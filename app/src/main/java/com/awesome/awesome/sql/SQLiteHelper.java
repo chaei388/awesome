@@ -1,6 +1,8 @@
 package com.awesome.awesome.sql;
 
+import android.content.ContentValues;
 import android.content.Context;
+
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -120,4 +122,17 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 
         db.close();
     }
+
+    public void updateAssignmentStatus(Assignment assignment) {
+        SQLiteDatabase db = this.getWritableDatabase();  // 데이터베이스 객체 가져오기
+
+        ContentValues values = new ContentValues();
+        values.put("status", Status.StatusToInt(assignment.getStatus()));  // 상태를 정수로 저장
+
+        // ID를 기준으로 데이터를 업데이트
+        db.update("Assignments", values, "ID = ?", new String[]{String.valueOf(assignment.getID())});
+
+        db.close();  // 데이터베이스 연결 종료
+    }
+
 }

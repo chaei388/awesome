@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.awesome.awesome.R;
 import com.awesome.awesome.Status;
+import com.awesome.awesome.Priority;
 import com.awesome.awesome.entity.Assignment;
 import com.awesome.awesome.sql.SQLiteHelper;
 
@@ -32,10 +33,11 @@ public class AssignmentForm extends AppCompatActivity {
     private Button submitBtn;
 
     private LinearLayout statusLayout;
-    private Spinner statusSpinner;
+    private Spinner statusSpinner,  prioritySpinner;
     private int selectedYear, selectedMonth, selectedDay;
     private int selectedHour, selectedMinute;
     private Status selectedStatus;
+    private Priority selectedPriority;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,8 +49,14 @@ public class AssignmentForm extends AppCompatActivity {
         submitBtn = (Button) findViewById(R.id.submitBtn);
         statusLayout = (LinearLayout)findViewById(R.id.statusLayout);
         statusSpinner = (Spinner) findViewById(R.id.statusSpinner);
+        prioritySpinner = (Spinner) findViewById(R.id.prioritySpinner);
 
         sqLiteHelper = new SQLiteHelper(getApplicationContext());
+
+        // 우선 순위 Spinner 설정
+        List<Priority> priorityList = List.of(Priority.LOW, Priority.MEDIUM, Priority.HIGH);
+        ArrayAdapter<Priority> priorityAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, priorityList);
+        prioritySpinner.setAdapter(priorityAdapter);
 
         Assignment assignment = (Assignment)getIntent().getSerializableExtra("Assignment");
         if (assignment != null) {
@@ -61,6 +69,8 @@ public class AssignmentForm extends AppCompatActivity {
             ArrayAdapter<Status> myAdapter = new ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, status);
             statusSpinner.setAdapter(myAdapter);
             statusSpinner.setSelection(assignment.getStatus().ordinal());
+
+            //prioritySpinner.setSelection(assignment.getPriority().ordinal());  // 수정할 때 우선 순위 설정
         }
 
         statusSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -72,6 +82,19 @@ public class AssignmentForm extends AppCompatActivity {
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
                 Toast.makeText(getApplicationContext(), "상태를 선택해 주세요", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // 우선 순위 선택 리스너
+        prioritySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                selectedPriority = Priority.intToPriority(i);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                Toast.makeText(getApplicationContext(), "우선 순위를 선택해 주세요", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -107,6 +130,15 @@ public class AssignmentForm extends AppCompatActivity {
 
                     finish();
                 }
+            }
+        });
+
+        // 뒤로 가기 버튼 설정
+        Button backBtn = findViewById(R.id.backBtn);
+        backBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish(); // 현재 Activity를 종료하고 이전 화면으로 돌아감
             }
         });
     }
