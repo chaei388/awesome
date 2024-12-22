@@ -24,27 +24,26 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-public class Incomplete extends Fragment {
-    SQLiteHelper sqLiteHelper;
-    FloatingActionButton fab;
-    RecyclerView recyclerView;
-    MyRecyclerAdapter adapter;
-    ArrayList<Assignment> todoList;
+public class Incomplete extends MyFragment {
 
     @Override
     public void onResume() {
         super.onResume();
 
-        todoList.clear();
-        todoList.addAll(sqLiteHelper.getIncompleteAssignments());
-        Collections.sort(todoList, new Comparator<Assignment>() {
+        updateList();
+    }
+
+    @Override
+    public void updateList() {
+        assignmentList.clear();
+        assignmentList.addAll(sqLiteHelper.getIncompleteAssignments());
+        Collections.sort(assignmentList, new Comparator<Assignment>() {
             @Override
             public int compare(Assignment a1, Assignment a2) {
                 return a1.getEndDateTime().compareTo(a2.getEndDateTime());
             }
         });
         adapter.notifyDataSetChanged();
-
     }
 
     @Nullable
@@ -59,17 +58,10 @@ public class Incomplete extends Fragment {
         }
 
         sqLiteHelper = new SQLiteHelper(getContext());
-        todoList = sqLiteHelper.getIncompleteAssignments();
-        Collections.sort(todoList, new Comparator<Assignment>() {
-            @Override
-            public int compare(Assignment a1, Assignment a2) {
-                return a1.getEndDateTime().compareTo(a2.getEndDateTime());
-            }
-        });
-
         recyclerView = v.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        adapter = new MyRecyclerAdapter(todoList);
+        assignmentList = new ArrayList<>();
+        adapter = new MyRecyclerAdapter(assignmentList, this);
         recyclerView.setAdapter(adapter);
 
         // FloatingActionButton 설정

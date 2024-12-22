@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import androidx.annotation.Nullable;
 
+import com.awesome.awesome.Priority;
 import com.awesome.awesome.Status;
 import com.awesome.awesome.entity.Assignment;
 
@@ -25,7 +26,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        sqLiteDatabase.execSQL("create table Assignments (ID integer primary key autoincrement, Name char(15), EndDate DateTime, Status Integer);");
+        sqLiteDatabase.execSQL("create table Assignments (ID integer primary key autoincrement, Name char(15), EndDate DateTime, Status Integer, Priority Integer);");
     }
 
     @Override
@@ -39,9 +40,10 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         String formattedDateTime = assignment.getEndDateTime().format(formatter);
+        int priority = Priority.PriorityToInt(assignment.getPriority());
 
-        db.execSQL("insert into Assignments(Name, EndDate, Status) values(?, ?, ?)",
-                new Object[]{assignment.getName(), formattedDateTime, Status.WAITING});
+        db.execSQL("insert into Assignments(Name, EndDate, Status, Priority) values(?, ?, ?, ?)",
+                new Object[]{assignment.getName(), formattedDateTime, Status.WAITING, priority});
 
         db.close();
     }
@@ -56,8 +58,9 @@ public class SQLiteHelper extends SQLiteOpenHelper {
             String dateTimeString = cursor.getString(2); // SQLite DATETIME 값
             LocalDateTime endDateTime = LocalDateTime.parse(dateTimeString, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
 
-            // 0 : id, 1 : name, 2 : end date, 3: status
-            Assignment assignment = new Assignment(cursor.getInt(0), cursor.getString(1), endDateTime, Status.intToStatus(cursor.getInt(3)));
+            // 0 : id, 1 : name, 2 : end date, 3: status, 4 : priority
+            Assignment assignment = new Assignment(cursor.getInt(0), cursor.getString(1), endDateTime, Status.intToStatus(cursor.getInt(3)),
+                    Priority.intToPriority(cursor.getInt(4)));
             result.add(assignment);
         }
 
@@ -79,7 +82,8 @@ public class SQLiteHelper extends SQLiteOpenHelper {
             LocalDateTime endDateTime = LocalDateTime.parse(dateTimeString, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
 
             // 0 : id, 1 : name, 2 : end date, 3: status
-            Assignment assignment = new Assignment(cursor.getInt(0), cursor.getString(1), endDateTime, Status.intToStatus(cursor.getInt(3)));
+            Assignment assignment = new Assignment(cursor.getInt(0), cursor.getString(1), endDateTime,
+                    Status.intToStatus(cursor.getInt(3)), Priority.intToPriority(cursor.getInt(4)));
             result.add(assignment);
         }
 
@@ -97,7 +101,8 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         cursor.moveToNext();
 
         // 0 : id, 1 : name, 2 : end date, 3: status
-        Assignment assignment = new Assignment(cursor.getInt(0), cursor.getString(1), LocalDateTime.parse(cursor.getString(2), formatter), Status.intToStatus(cursor.getInt(3)));
+        Assignment assignment = new Assignment(cursor.getInt(0), cursor.getString(1), LocalDateTime.parse(cursor.getString(2), formatter),
+                Status.intToStatus(cursor.getInt(3)), Priority.intToPriority(cursor.getInt(4)));
         Assignment result = assignment;
 
         cursor.close();
@@ -113,8 +118,8 @@ public class SQLiteHelper extends SQLiteOpenHelper {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
             String formattedDateTime = assignment.getEndDateTime().format(formatter);
 
-            db.execSQL("update Assignments set Name = ?, EndDate = ?, Status = ? where id = ?;",
-                    new Object[]{assignment.getName(), formattedDateTime, Status.StatusToInt(assignment.getStatus()), id});
+            db.execSQL("update Assignments set Name = ?, EndDate = ?, Status = ?, Priority = ? where id = ?;",
+                    new Object[]{assignment.getName(), formattedDateTime, Status.StatusToInt(assignment.getStatus()), Priority.PriorityToInt(assignment.getPriority()), id});
         }
         catch (Exception e) {
 

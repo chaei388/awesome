@@ -54,7 +54,7 @@ public class AssignmentForm extends AppCompatActivity {
         sqLiteHelper = new SQLiteHelper(getApplicationContext());
 
         // 우선 순위 Spinner 설정
-        List<Priority> priorityList = List.of(Priority.LOW, Priority.MEDIUM, Priority.HIGH);
+        List<Priority> priorityList = List.of(Priority.HIGH, Priority.MEDIUM, Priority.LOW);
         ArrayAdapter<Priority> priorityAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, priorityList);
         prioritySpinner.setAdapter(priorityAdapter);
 
@@ -70,7 +70,7 @@ public class AssignmentForm extends AppCompatActivity {
             statusSpinner.setAdapter(myAdapter);
             statusSpinner.setSelection(assignment.getStatus().ordinal());
 
-            //prioritySpinner.setSelection(assignment.getPriority().ordinal());  // 수정할 때 우선 순위 설정
+            prioritySpinner.setSelection(Priority.PriorityToInt(assignment.getPriority()));  // 수정할 때 우선 순위 설정
         }
 
         statusSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -117,7 +117,7 @@ public class AssignmentForm extends AppCompatActivity {
                 } else {
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
                     Assignment newAssignment = new Assignment(assignment != null ? assignment.getID() : -1, assignmentName, LocalDateTime.parse(dateTime, formatter),
-                            selectedStatus);
+                            selectedStatus, selectedPriority);
 
                     if (assignment == null) {
                         // 생성

@@ -1,12 +1,14 @@
 package com.awesome.awesome.adapter;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.awesome.awesome.R;
@@ -14,6 +16,7 @@ import com.awesome.awesome.Status;
 import com.awesome.awesome.activity.AssignmentForm;
 import com.awesome.awesome.entity.Assignment;
 import com.awesome.awesome.sql.SQLiteHelper;
+import com.awesome.awesome.tab.MyFragment;
 
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -27,9 +30,11 @@ import java.util.List;
 public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.MyViewHolder> {
 
     private List<Assignment> items;
+    private MyFragment fragment;
 
-    public MyRecyclerAdapter(List<Assignment> items) {
+    public MyRecyclerAdapter(List<Assignment> items, MyFragment fragment) {
         this.items = items;
+        this.fragment = fragment;
     }
 
     @NonNull
@@ -38,7 +43,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.My
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.recycler, parent, false);
 
-        return new MyViewHolder(view);
+        return new MyViewHolder(view, fragment);
     }
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
@@ -64,14 +69,16 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.My
         Button modifyBtn;
         SQLiteHelper sqLiteHelper;
         private Spinner assignmentStatusSpinner;
+        private MyFragment innerFragment;
 
-        public MyViewHolder(@NonNull View itemView) {
+        public MyViewHolder(@NonNull View itemView, MyFragment fragment) {
             super(itemView);
             assignmentID = itemView.findViewById(R.id.assignmentID);
             assignmentName = itemView.findViewById(R.id.listAssignmentName);
             assignmentEndDateTime = itemView.findViewById(R.id.listAssignmentDate);
             assignmentStatus = itemView.findViewById(R.id.listAssignmentStatus);
             modifyBtn = itemView.findViewById(R.id.modifyBtn);
+            innerFragment = fragment;
 
             modifyBtn = itemView.findViewById(R.id.modifyBtn);
             modifyBtn.setOnClickListener(new View.OnClickListener() {
@@ -95,6 +102,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.My
             });
 
             itemView.setOnClickListener(new View.OnClickListener() {
+
                 @Override
                 public void onClick(View view) {
                     // 클릭된 아이템의 ID를 가져옴
@@ -162,6 +170,8 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.My
                                     // 수정된 상태를 반영한 Assignment 객체를 DB에 업데이트
                                     sqLiteHelper.updateAssignmentStatus(assignment); // DB에 상태 반영
 
+                                    innerFragment.updateList();
+
                                     dialog.dismiss(); // 팝업을 닫음
                                 }
                             })
@@ -172,6 +182,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.My
                                 }
                             })
                             .show(); // 팝업 다이얼로그 띄우기
+
                 }
             });
         }
