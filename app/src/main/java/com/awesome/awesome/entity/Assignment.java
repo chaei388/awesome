@@ -2,7 +2,7 @@ package com.awesome.awesome.entity;
 
 
 import com.awesome.awesome.Status;
-
+import com.awesome.awesome.Priority;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -12,6 +12,7 @@ public class Assignment implements Serializable {
     String name;
     LocalDateTime endDateTime;
     Status status;
+    Priority priority;
 
     public Assignment(String name, LocalDateTime endDateTime) {
         this.name = name;
@@ -19,11 +20,12 @@ public class Assignment implements Serializable {
         status = Status.WAITING;
     }
 
-    public Assignment(int ID, String name, LocalDateTime endDateTime, Status status) {
+    public Assignment(int ID, String name, LocalDateTime endDateTime, Status status, Priority priority) {
         this.ID = ID;
         this.name = name;
         this.endDateTime = endDateTime;
         this.status = status;
+        this.priority = priority;
     }
 
     public int getID() {
@@ -58,5 +60,12 @@ public class Assignment implements Serializable {
         this.status = newStatus;
     }
 
+    public Priority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Priority priority) {
+        this.priority = priority;
+    }
 
 }

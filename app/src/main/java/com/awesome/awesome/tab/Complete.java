@@ -1,5 +1,6 @@
 package com.awesome.awesome.tab;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.awesome.awesome.R;
+import com.awesome.awesome.activity.AssignmentForm;
 import com.awesome.awesome.adapter.MyRecyclerAdapter;
 import com.awesome.awesome.entity.Assignment;
 import com.awesome.awesome.sql.SQLiteHelper;
@@ -21,20 +23,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-public class Complete extends Fragment {
-
-    SQLiteHelper sqLiteHelper;
-    ArrayList<Assignment> completeList;
-    RecyclerView recyclerView;
-    MyRecyclerAdapter adapter;
+public class Complete extends MyFragment {
 
     @Override
     public void onResume() {
         super.onResume();
 
-        completeList.clear();
-        completeList.addAll(sqLiteHelper.getCompleteAssignments());
-        Collections.sort(completeList, new Comparator<Assignment>() {
+        updateList();
+    }
+
+    @Override
+    public void updateList() {
+        assignmentList.clear();
+        assignmentList.addAll(sqLiteHelper.getCompleteAssignments());
+        Collections.sort(assignmentList, new Comparator<Assignment>() {
             @Override
             public int compare(Assignment a1, Assignment a2) {
                 return a1.getEndDateTime().compareTo(a2.getEndDateTime());
@@ -55,19 +57,23 @@ public class Complete extends Fragment {
         }
 
         sqLiteHelper = new SQLiteHelper(getContext());
-        completeList = sqLiteHelper.getCompleteAssignments();
-
-        Collections.sort(completeList, new Comparator<Assignment>() {
-            @Override
-            public int compare(Assignment a1, Assignment a2) {
-                return a1.getEndDateTime().compareTo(a2.getEndDateTime());
-            }
-        }.reversed());
-
         recyclerView = v.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        adapter = new MyRecyclerAdapter(completeList);
+        assignmentList = new ArrayList<>();
+        adapter = new MyRecyclerAdapter(assignmentList, this);
         recyclerView.setAdapter(adapter);
+
+
+        // FloatingActionButton 설정
+        fab = v.findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), AssignmentForm.class);
+
+                startActivity(intent);
+            }
+        });
 
         return v;
     }
